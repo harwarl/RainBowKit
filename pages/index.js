@@ -3,12 +3,15 @@ import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useNetwork, useSwitchNetwork } from 'wagmi'
 import { useBalance } from 'wagmi'
-import { InjectedConnector } from 'wagmi/connectors/injected'
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
+  //network switching
+  const { chain } = useNetwork()
+  const { chains, error, pendingChainId, switchNetwork} = useSwitchNetwork();
+  
   const { address, isConnected } = useAccount({
     onConnect: ({ address, isReconnected, connector }) =>{
       alert('Wallet has been connected, ' + address);
@@ -23,19 +26,37 @@ export default function Home() {
 
   if (isConnected) {
     return (
+      <>
       <div>
         address: { address }
         balance: { data?.formatted } {data?.symbol}
         <button onClick={() => disconnect()}>Disconnect</button>
       </div> 
+
+      {chain && <div>connected to {chain.name}</div>}
+      {chains.map((x) => (
+          <button
+            disabled={!switchNetwork || x.id === chain?.id}
+            key={x.id}
+            onClick={() => switchNetwork?.(x.id)}
+          >
+            {x.name}
+            {isLoading && pendingChainId === x.id && ' (switching)'}
+          </button>
+        ))}
+
+        <div>{error && error.message}</div>
+        </>
     )
   }
-  
+
   return ( 
     <>
     <div>
       <h1>Connect To Wallet</h1>
     </div>
+    
+
     {/* <ConnectButton /> */}
     <ConnectButton.Custom>
       {({
