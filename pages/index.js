@@ -3,15 +3,24 @@ import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { useAccount, useConnect, useDisconnect, useNetwork, useSwitchNetwork } from 'wagmi'
+import { useAccount, useConnect, useContractWrite, useDisconnect, useNetwork, usePrepareContractWrite, useSwitchNetwork } from 'wagmi'
 import { useBalance } from 'wagmi'
+import contractInfo from '@/data/contract'
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
   //network switching
   const { chain } = useNetwork()
-  const { chains, error, pendingChainId, switchNetwork} = useSwitchNetwork();
-  
+  const { chains, pendingChainId, switchNetwork} = useSwitchNetwork();
+  const { config, error } = usePrepareContractWrite({
+    address: '0x04e50252591c47eAC0Ec645668D8Bc9ec9cbe973', 
+    abi: contractInfo,
+    functionName: 'depositETH'
+  })
+
+  console.log(error?.message);
+  const { write: trf, isSuccess } = useContractWrite(config); 
+
   const { address, isConnected } = useAccount({
     onConnect: ({ address, isReconnected, connector }) =>{
       alert('Wallet has been connected, ' + address);
@@ -30,6 +39,16 @@ export default function Home() {
       <div>
         address: { address }
         balance: { data?.formatted } {data?.symbol}
+        <button
+        style={{marginTop: 24}}
+        onClick={() => {trf?.()}}
+        >
+          Send
+        </button>
+        {isSuccess && <div>
+          Sent Successfully
+          </div>
+          }
         <button onClick={() => disconnect()}>Disconnect</button>
       </div> 
 

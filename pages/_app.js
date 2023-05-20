@@ -5,11 +5,11 @@ import {
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
-import { mainnet, bsc, polygon} from 'wagmi/chains';
+import { bscTestnet } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 
 const { chains, publicClient } = configureChains(  ///sets up the chains
-  [mainnet, bsc, polygon],
+  [bscTestnet],
   [publicProvider()]
 );
 
