@@ -5,6 +5,7 @@ import styles from '@/styles/Home.module.css'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useDisconnect, useBalance, useNetwork, usePrepareContractWrite, useContractWrite, useSwitchNetwork} from 'wagmi'
 import { contractABI } from '@/data/ABI'
+import { parseEther } from 'viem'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -41,16 +42,14 @@ export default function Home() {
     address: '0x04e50252591c47eAC0Ec645668D8Bc9ec9cbe973',
     abi: contractABI,
     functionName: "depositETH",
-    args: ["name", "email", "invoiceId", "paymentFor", "Note"],
+    args: ["_name", "_email", "_invoiceID", "_paymentFor", "_note"],
+    value: parseEther('0.001')
   })
 
   const {
     write: EthWrite,
     isSuccess
   } = useContractWrite(config)
-
-  console.log(error?.message);
-  console.log(isSuccess);
 
   const { disconnect } = useDisconnect();
 
