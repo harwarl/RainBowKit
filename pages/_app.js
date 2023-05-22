@@ -1,17 +1,19 @@
 import '@/styles/globals.css'
-import '@rainbow-me/rainbowkit/styles.css';
+import '@rainbow-me/rainbowkit/styles.css'
 import {
   getDefaultWallets,
   RainbowKitProvider,
-} from '@rainbow-me/rainbowkit';
-import { configureChains, createConfig, WagmiConfig } from 'wagmi';
-import { bscTestnet } from 'wagmi/chains';
-import { publicProvider } from 'wagmi/providers/public';
+} from '@rainbow-me/rainbowkit'
+import { configureChains, createConfig, WagmiConfig } from 'wagmi'
+import { bscTestnet } from 'wagmi/chains'
+import { publicProvider } from 'wagmi/providers/public'
 
 const { chains, publicClient } = configureChains(  ///sets up the chains
   [bscTestnet],
   [publicProvider()]
 );
+
+console.log(publicClient);
 
 const { connectors } = getDefaultWallets({  //get connectors to create a wagmi client
   appName: "TestApp",
@@ -24,6 +26,7 @@ const wagmiConfig = createConfig({
   connectors,
   publicClient
 })
+
 
 export default function App({ Component, pageProps }) {
   return (

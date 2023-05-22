@@ -3,33 +3,54 @@ import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { useAccount, useConnect, useContractWrite, useDisconnect, useNetwork, usePrepareContractWrite, useSwitchNetwork } from 'wagmi'
-import { useBalance } from 'wagmi'
-import contractInfo from '@/data/contract'
+import { useAccount, useDisconnect, useBalance, useNetwork, usePrepareContractWrite, useContractWrite, useSwitchNetwork} from 'wagmi'
+import { contractABI } from '@/data/ABI'
+
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
   //network switching
   const { chain } = useNetwork()
-  const { chains, pendingChainId, switchNetwork} = useSwitchNetwork();
-  const { config, error } = usePrepareContractWrite({
-    address: '0x04e50252591c47eAC0Ec645668D8Bc9ec9cbe973', 
-    abi: contractInfo,
-    functionName: 'depositETH'
-  })
-
-  console.log(error?.message);
-  const { write: trf, isSuccess } = useContractWrite(config); 
-
-  const { address, isConnected } = useAccount({
+  const { 
+    chains, 
+    pendingChainId, 
+    switchNetwork
+  } = useSwitchNetwork();
+  
+  const { 
+    address, 
+    isConnected 
+  } = useAccount({
     onConnect: ({ address, isReconnected, connector }) =>{
       alert('Wallet has been connected, ' + address);
     }
   });
 
-  const { data, isError, isLoading } = useBalance({
+  const { 
+    data, 
+    isError, 
+    isLoading 
+  } = useBalance({
     address: address
   });
+
+  const {
+    config, 
+    error
+  } = usePrepareContractWrite({
+    address: '0x04e50252591c47eAC0Ec645668D8Bc9ec9cbe973',
+    abi: contractABI,
+    functionName: "depositETH",
+    args: ["name", "email", "invoiceId", "paymentFor", "Note"],
+  })
+
+  const {
+    write: EthWrite,
+    isSuccess
+  } = useContractWrite(config)
+
+  console.log(error?.message);
+  console.log(isSuccess);
 
   const { disconnect } = useDisconnect();
 
@@ -39,16 +60,7 @@ export default function Home() {
       <div>
         address: { address }
         balance: { data?.formatted } {data?.symbol}
-        <button
-        style={{marginTop: 24}}
-        onClick={() => {trf?.()}}
-        >
-          Send
-        </button>
-        {isSuccess && <div>
-          Sent Successfully
-          </div>
-          }
+        <button onClick={()=> EthWrite?.()}>Send</button>
         <button onClick={() => disconnect()}>Disconnect</button>
       </div> 
 
@@ -63,10 +75,11 @@ export default function Home() {
             {isLoading && pendingChainId === x.id && ' (switching)'}
           </button>
         ))}
-
-        <div>{error && error.message}</div>
         </>
     )
+    {error && (
+      <div>An error occurred preparing the transaction: {error.message}</div>
+    )}
   }
 
   return ( 
@@ -74,10 +87,9 @@ export default function Home() {
     <div>
       <h1>Connect To Wallet</h1>
     </div>
-    
-
-    {/* <ConnectButton /> */}
-    <ConnectButton.Custom>
+  
+    <ConnectButton />
+    {/* <ConnectButton.Custom>
       {({
         account,
         chain,
@@ -160,7 +172,7 @@ export default function Home() {
           </div>
         );
       }}
-    </ConnectButton.Custom>
+    </ConnectButton.Custom> */}
     </>
   )
 
